@@ -1,0 +1,25 @@
+import Link from "next/link";
+import { ArrowLeft, ArrowUpRight, CalendarDays, Clock3, Medal, Trophy, Waves } from "lucide-react";
+import type { AthleteProfileData } from "@/lib/athlete-profile";
+
+export default function AthleteProfile({ athlete }: { athlete: AthleteProfileData }) {
+  const podiums = athlete.results.filter((result) => result.position <= 3).length;
+  return <main className="profile-page">
+    <header className="profile-topbar"><Link href="/" className="profile-back"><ArrowLeft size={15} /> Season dashboard</Link><Link href="/" className="profile-brand"><Waves size={18} /> FANTASY ROWING</Link><Link className="profile-my-crew" href="/?view=squad">Build your crew <ArrowUpRight size={14} /></Link></header>
+    <div className="profile-content">
+      <div className="profile-overline"><span>THE ROWING DIRECTORY</span><i /> ATHLETE PROFILE</div>
+      <section className="athlete-hero"><div className="athlete-portrait" style={{ "--portrait": athlete.color } as React.CSSProperties}><span>{athlete.initials}</span><i /></div><div className="athlete-identity"><div className="athlete-rank-label"><Medal size={14} /> NATIONAL RANKING #{athlete.rank}</div><h1>{athlete.name}</h1><p>{athlete.school} <i /> {athlete.year} <i /> {athlete.boat}</p><span className="athlete-bio">{athlete.bio || `${athlete.name} represents ${athlete.school} in junior school rowing.`}</span></div><div className="athlete-points"><span>SEASON POINTS</span><strong>{athlete.points}</strong><small>FANTASY PTS</small></div></section>
+      <section className="profile-stat-grid"><ProfileStat label="2K ERG" value={athlete.erg} note="Latest recorded" /><ProfileStat label="AGE" value={athlete.age ? `${athlete.age}` : "—"} note={athlete.age ? `${athlete.year} group` : "Not recorded"} /><ProfileStat label="HEIGHT" value={athlete.height} note="Athlete data" /><ProfileStat label="FANTASY VALUE" value={`£${athlete.price.toFixed(1)}m`} note="Current season" /><ProfileStat label="PODIUM FINISHES" value={String(podiums).padStart(2, "0")} note={`${athlete.eventCategory} rowing`} /></section>
+      <div className="profile-sections">
+        <section className="profile-panel"><div className="profile-panel-title"><div><span>THE RACE RECORD</span><h2>Results history</h2></div><Trophy size={17} /></div>{athlete.results.length ? <div className="profile-results"><div className="profile-results-head"><span>REGATTA · EVENT</span><span>FINISH</span><span>TIME</span><span>POINTS</span></div>{athlete.results.map((result, index) => <div className="profile-result-row" key={`${result.regatta}-${index}`}><span><strong>{result.regatta}</strong><small>{result.event} · {result.date}</small></span><b className={result.position <= 3 ? "podium-finish" : ""}>{result.position === 1 ? "1st" : result.position === 2 ? "2nd" : result.position === 3 ? "3rd" : `${result.position}th`}</b><span>{result.time}</span><strong>+{result.points}</strong></div>)}</div> : <p className="profile-empty">No race results recorded yet.</p>}</section>
+        <section className="profile-panel"><div className="profile-panel-title"><div><span>THE ERG CURVE</span><h2>2K progress</h2></div><Clock3 size={17} /></div><div className="erg-history">{athlete.ergHistory.map((item, index) => <div className="erg-history-row" key={`${item.date}-${index}`}><span className="erg-history-dot" /><span><strong>{item.score}</strong><small>{item.date}</small></span>{index === 0 && <b>LATEST</b>}</div>)}</div><div className="profile-team-context"><span className="profile-crest" style={{ background: athlete.color }}>{athlete.school[0]}</span><span><small>ROWING FOR</small><strong>{athlete.school}</strong></span><span className="profile-team-boat">{athlete.boat}</span></div></section>
+      </div>
+      <section className="profile-panel profile-upcoming"><div className="profile-panel-title"><div><span>ON THE HORIZON</span><h2>Upcoming races</h2></div><CalendarDays size={17} /></div><div className="upcoming-races">{athlete.upcomingRaces.map((race) => <div className="upcoming-race" key={race.name}><div className="upcoming-date"><strong>{race.date.split(" ")[0]}</strong><small>{race.date.split(" ").slice(1).join(" ")}</small></div><span><strong>{race.name}</strong><small>{race.location}</small></span><ArrowUpRight size={15} /></div>)}{athlete.upcomingRaces.length === 0 && <p className="profile-empty">Upcoming fixtures will appear here when dates are confirmed.</p>}</div></section>
+      <footer className="profile-footer"><span>FANTASY ROWING · ATHLETE DIRECTORY</span><Link href="/">BACK TO THE SEASON <ArrowLeft size={12} /></Link></footer>
+    </div>
+  </main>;
+}
+
+function ProfileStat({ label, value, note }: { label: string; value: string; note: string }) {
+  return <div className="profile-stat"><span>{label}</span><strong>{value}</strong><small>{note}</small></div>;
+}
